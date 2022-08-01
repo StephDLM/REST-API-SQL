@@ -1,5 +1,8 @@
 'use strict';
 
+const { sequelize, models } = require('./models');
+
+
 // load modules
 const express = require('express');
 const morgan = require('morgan');
@@ -46,3 +49,23 @@ app.set('port', process.env.PORT || 5000);
 const server = app.listen(app.get('port'), () => {
   console.log(`Express server is listening on port ${server.address().port}`);
 });
+
+console.log('Testing the connection to the database...');
+
+// Test the connection to the database: 
+console.log('Testing the connection to the database...');
+
+(async () => {
+  try {
+    // Test the connection to the database
+    await sequelize.authenticate();
+    console.log('Connection to the database successful!');
+
+    // Sync the models
+    console.log('Synchronizing the models with the database...');
+    await sequelize.sync({ force: true });
+
+  } catch(error) {
+    throw error;
+  }
+})();
