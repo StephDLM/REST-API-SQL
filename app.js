@@ -2,6 +2,20 @@
 
 const { sequelize, models } = require('./models');
 
+(async () => {
+  try {
+    // Test the connection to the database
+    await sequelize.authenticate();
+    console.log('Connection to the database successful!');
+
+    // Sync the models
+    console.log('Synchronizing the models with the database...');
+    await sequelize.sync({ force: true });
+
+  } catch(error) {
+    throw error;
+  }
+})();
 
 // load modules
 const express = require('express');
@@ -54,18 +68,3 @@ console.log('Testing the connection to the database...');
 
 // Test the connection to the database: 
 console.log('Testing the connection to the database...');
-
-(async () => {
-  try {
-    // Test the connection to the database
-    await sequelize.authenticate();
-    console.log('Connection to the database successful!');
-
-    // Sync the models
-    console.log('Synchronizing the models with the database...');
-    await sequelize.sync({ force: true });
-
-  } catch(error) {
-    throw error;
-  }
-})();
