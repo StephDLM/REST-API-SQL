@@ -6,8 +6,7 @@ module.exports = (sequelize) => {
     Course.init({
       title: {
         type: DataTypes.STRING,
-        primaryKey: true,
-        autoIncrement: true,
+        allowNull: false,
       },
       description: {
         type: DataTypes.TEXT,
@@ -25,9 +24,9 @@ module.exports = (sequelize) => {
   
     Course.associate = (models) => {
       Course.belongsTo(models.User, { //1-1 association
-        as: 'user', // alias
+        // as: 'user', // alias
         foreignKey: {
-          fieldName: 'userPersonId',
+          fieldName: 'userId',
           allowNull: false,
         },
       });
