@@ -3,7 +3,7 @@ const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
     class Course extends Model {}
-    Users.init({
+    Course.init({
       title: {
         type: DataTypes.STRING,
         primaryKey: true,
@@ -24,10 +24,10 @@ module.exports = (sequelize) => {
     }, { sequelize });
   
     Course.associate = (models) => {
-      Course.belongsTo(models.Users, { //1-1 association
-        as: 'Users',
+      Course.belongsTo(models.User, { //1-1 association
+        as: 'user', // alias
         foreignKey: {
-          fieldName: 'PersonId',
+          fieldName: 'userPersonId',
           allowNull: false,
         },
       });
@@ -35,3 +35,4 @@ module.exports = (sequelize) => {
   
     return Course;
   };
+  //ref: https://teamtreehouse.com/library/data-relationships-with-sql-and-sequelize-2/data-relationships-in-sequelize/define-a-onetomany-relationship-using-sequelize-associations

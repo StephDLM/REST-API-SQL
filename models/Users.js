@@ -58,10 +58,10 @@ module.exports = (sequelize) => {
   }}, { sequelize });
 
   User.associate = (models) => {
-    User.hasMany(models.Courses, { //1-to many association 
-        as: 'Users',
+    User.hasMany(models.Course, { //1-to many association 
+        as: 'user',
         foreignKey: {
-          fieldName: 'PersonId',
+          fieldName: 'userPersonId',
           allowNull: false,
       },
     });
