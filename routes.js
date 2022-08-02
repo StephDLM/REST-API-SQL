@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const Courses = require('./models/Courses');
+// const Courses = require('./models/Courses');
 const User = require('./models').User;
 const Course = require('./models').Course;
 const router = express.Router(); // Construct a router instance.
@@ -18,25 +18,17 @@ function asyncHandler(cb) {
     }
   }
 
-//return all properties and values for the currently authenticated 
+//route returns all properties and values for the currently authenticated user
 router.get('/users', asyncHandler(async (req, res) => {
-    const users = await User.findAll({
-        // res.json({
-        //     firstName: users.firstName,
-        //     lastName: users.lastName,
-        //     email: users.email,
-        //     password: users.password
-        include: [
-          {
-            model: users,
-            as: 'director',
-          },
-        ],
-      });
-    res.status(200).json({ "message": "Account successfully created!" });
-    res.json(users);
+    const user = req.currentUser; // Store the user on the Request object
+    res.status(200).json({ 
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            password: user.password
+     });
+    res.json(user);
   }));
-
 
 
   // Route that creates a new user.
