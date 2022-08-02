@@ -15,20 +15,19 @@ exports.authenticateUser = async (req, res, next) => {
   const credentials = auth(req);
 
   if (credentials) {
-    const user = await User.findOne({ where: {username: credentials.name} });
+    const user = await User.findOne({ where: {email: credentials.name} });
     if (user) {
       const authenticated = bcrypt
-        .compareSync(credentials.pass, user.confirmedPassword);
+        .compareSync(credentials.pass, user.password);
       if (authenticated) {
-        console.log(`Authentication successful for username: ${user.username}`);
-
+        console.log(`Authentication successful for username: ${user.email}`);
         // Store the user on the Request object.
         req.currentUser = user;
       } else {
-        message = `Authentication failure for username: ${user.username}`;
+        message = `Authentication failure for email: ${user.email}`;
       }
     } else {
-      message = `User not found for username: ${credentials.name}`;
+      message = `user not found for username: ${credentials.email}`;
     }
   } else {
     message = 'Auth header not found';
@@ -41,3 +40,19 @@ exports.authenticateUser = async (req, res, next) => {
     next();
   }
 };
+
+  // confirmedPassword: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  //   set(val) {
+  //     if ( val === this.password ) {
+  //       const hashedPassword = bcrypt.hashSync(val, 10);
+  //       this.setDataValue('confirmedPassword', hashedPassword);
+  //     }
+  //   },
+  //   validate: {
+  //     notNull: {
+  //       msg: 'Both passwords must match'
+  //     }
+  //   }
+  // }
