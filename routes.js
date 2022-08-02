@@ -40,7 +40,7 @@ router.post('/users', asyncHandler(async (req, res) => {
       res.status(201).json({ "message": "Account successfully created!" });
     } catch (error) {
       console.log('ERROR: ', error.name);
-      if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+      if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') { //validation to ensure that the following required values are properly submitted 
         const errors = error.errors.map(err => err.message);
         res.status(400).json({ errors });   
       } else {
@@ -59,9 +59,8 @@ router.get('/courses', asyncHandler(async(req, res) =>{
               model: User,
               as: 'userId', //courses and user associated with the course
               //do not include created at and updated at for users
-              through: {
-                attributes: ['firstName', 'lastName', 'email']
-              }
+              attributes: ['firstName', 'lastName', 'email']
+              
             },
           ],through: {
             attributes: ['title', 'description'] //don't include created at and updated at for courses    
@@ -94,8 +93,6 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
     }));
 
 
-
-
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
 router.post('/courses/:id'), asyncHandler(async(req,res) =>{
     try{
@@ -105,10 +102,10 @@ router.post('/courses/:id'), asyncHandler(async(req,res) =>{
         });
         res.status(201).json(course).end();
     } catch (error) {
-        if (error.name === "SequelizeValidationError") {
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });   
-            res.status(400).json({message: "title and description required."});
+            // res.status(400).json({message: "title and description required."});
         } else{
             throw error;
         }    
