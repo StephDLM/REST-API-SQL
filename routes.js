@@ -1,9 +1,10 @@
 'use strict';
 
 const express = require('express');
+const { restart } = require('nodemon');
 // const Courses = require('./models/Courses');
-const User = require('./models').User;
-const Course = require('./models').Course;
+// const User = require('./models').User;
+// const Course = require('./models').Course;
 const router = express.Router(); // Construct a router instance.
 const {User, Course} = require('./models');
 
@@ -26,7 +27,6 @@ router.get('/users', asyncHandler(async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            password: user.password
      });
     res.json(user);
   }));
@@ -51,14 +51,21 @@ router.post('/users', asyncHandler(async (req, res) => {
 
 //app/courses/GET route that will return all courses including the User associated with each course and a 200 HTTP status code.
 //source: https://teamtreehouse.com/library/data-relationships-with-sql-and-sequelize-2/retrieve-related-data-in-sequelize-queries/retrieve-data-with-findall
+//source for attributes: https://sequelize.org/docs/v6/advanced-association-concepts/eager-loading/#fetching-all-associated-elements
 router.get('/courses', asyncHandler(async(req, res) =>{
     const courses = await Course.findAll({
-        include: [
+        include: [ 
             {
               model: User,
-              as: 'userId',
+              as: 'userId', //courses and user associated with the course
+              //do not include created at and updated at for users
+              through: {
+                attributes: ['firstName', 'lastName', 'email']
+              }
             },
-          ],     
+          ],through: {
+            attributes: ['title', 'description'] //don't include created at and updated at for courses    
+          }
         });
         // Set the status to 201 Created and end the response.
         res.status(200).json({courses});
@@ -68,8 +75,8 @@ router.get('/courses', asyncHandler(async(req, res) =>{
 ///api/courses/:id GET route that will return the corresponding course including the User associated with that course and a 200 HTTP status code.
 router.get('/courses/:id', asyncHandler(async(req,res) =>{
     const courses = await Course.findByPk(req.params.id);
-    res.status(200).json();
-  }
+    res.status(200).json({courses});
+  } // return one instead of all
 ))
 
 
@@ -77,30 +84,58 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
 router.post('/courses/:id'), asyncHandler(async(req,res) =>{
     try {
-        let course = await Course.create(req.body);
+        let courses = await Course.create(req.body);
         res.redirect("/");
       } catch (error) {
         if(error.name === "SequelizeValidationError") {
-          book = await Courses.build(req.body);
-          res.render({ Courses, error: error.errors})
+           courses = await Courses.build(req.body);
+        //   res.render({ Courses, error: error.errors})
         } else {
           throw error;
         }  
 }})
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
 router.put('/courses/:id'), asyncHandler(async(req,res) =>{
+// add a try catch -- using a find by pk, course.update 
+const course = await Course.findByPk(req.params.id); //async call
+    try {
+        if (course) {
+            if(req.currentUser.id === course.userId) {
+                await course.update(req.body);
+                res.redirect("/");
+                res.status(204).json({message: "Course has been updated"}).end();
+            } else {
+                res.sendStatus(404);
+            }
+        } else {
+        res.sendStatus(404);
+        }
+    } catch (error) {
+        if (error.name === "SequelizeValidationError") {
+            // const course = await Course.build(req.body);
+            course.id = req.body.id; // make sure correct course gets updated  
+            res.status(400);
+        } else{
+            throw error;
+        }
+}})
 
-})
 //api/courses/:id DELETE route that will delete the corresponding course and return a 204 HTTP status code and no content.
-router.delete('/courses/:id'), asyncHandler(async(req,res) =>{
-    try{
-        const courses = await records.getCourse(req.params.id)
-        await records.deleteCourse(courses);
-        res.json(204).end();
-    } catch (err){
-        res.status(400).json({message: err.message})
-    }
-})
+router.delete('/courses/:id'), asyncHandler(async(req,res) =>{ // use from project 
+    const course = await Course.findByPk(req.params.id);
+    if (course) {
+      if (req.currentUser.id === course.userId){
+        await course.destroy();
+        res.redirect("/");
+        res.status(204).json({message: "Course has been deleted"}).end();
+      } else {
+        res.status(400).json({message: "Course can't be deleted"})
+      }
+    } else {
+      res.sendStatus(404);
+    }})
+
+ module.exports = router;
 //not sure if i need this for project
 
 //   // Validate that we have a `name` value.
@@ -135,4 +170,3 @@ router.delete('/courses/:id'), asyncHandler(async(req,res) =>{
 //     res.status(201).end();
 //   };
 
-module.exports = router;
