@@ -3,20 +3,6 @@
 const { sequelize, models } = require('./models');
 const routes = require('./routes')
 
-(async () => {
-  try {
-    // Test the connection to the database
-    await sequelize.authenticate();
-    console.log('Connection to the database successful!');
-
-    // Sync the models
-    console.log('Synchronizing the models with the database...');
-    await sequelize.sync({ force: true });
-
-  } catch(error) {
-    throw error;
-  }
-})();
 
 // load modules
 const express = require('express');
@@ -30,6 +16,21 @@ const app = express();
 app.use(express.json());
 app.use('/api', routes);
 
+
+(async () => {
+  try {
+    // Test the connection to the database
+    await sequelize.authenticate();
+    console.log('Connection to the database successful!');
+
+    // Sync the models
+    console.log('Synchronizing the models with the database...');
+    await sequelize.sync(); //took out force(true) to avoid over writing database when i start my app
+
+  } catch(error) {
+    throw error;
+  }
+})();
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
