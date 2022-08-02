@@ -55,7 +55,7 @@ router.get('/courses', asyncHandler(async(req, res) =>{
         include: [
             {
               model: User,
-              as: user,
+              as: userId,
             },
           ],     
         });

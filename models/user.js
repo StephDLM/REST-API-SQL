@@ -56,7 +56,23 @@ module.exports = (sequelize) => {
             msg: 'Please provide a password'
           }
         }
-  }}, { sequelize });
+  },
+  confirmedPassword: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    set(val) {
+      if ( val === this.password ) {
+        const hashedPassword = bcrypt.hashSync(val, 10);
+        this.setDataValue('confirmedPassword', hashedPassword);
+      }
+    },
+    validate: {
+      notNull: {
+        msg: 'Both passwords must match'
+      }
+    }
+  }
+}, { sequelize });
 
   User.associate = (models) => {
     User.hasMany(models.Course, { //1-to many association 
