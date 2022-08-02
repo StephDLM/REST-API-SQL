@@ -5,6 +5,7 @@ const express = require('express');
 const User = require('./models').User;
 const Course = require('./models').Course;
 const router = express.Router(); // Construct a router instance.
+const {User, Course} = require('./models');
 
 // Handler function to wrap each route.
 function asyncHandler(cb) {
@@ -55,12 +56,12 @@ router.get('/courses', asyncHandler(async(req, res) =>{
         include: [
             {
               model: User,
-              as: userId,
+              as: 'userId',
             },
           ],     
         });
         // Set the status to 201 Created and end the response.
-        res.status(200).end();
+        res.status(200).json({courses});
     }  
 ));
 
