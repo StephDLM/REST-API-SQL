@@ -73,27 +73,48 @@ router.get('/courses', asyncHandler(async(req, res) =>{
 ));
 
 ///api/courses/:id GET route that will return the corresponding course including the User associated with that course and a 200 HTTP status code.
+//attributes exclude resource: https://sequelize.org/docs/v6/core-concepts/model-querying-basics/
 router.get('/courses/:id', asyncHandler(async(req,res) =>{
-    const courses = await Course.findByPk(req.params.id);
-    res.status(200).json({courses});
-  } // return one instead of all
-))
+    const courses = await Course.findByPk(req.params.id, {
+        //do not include created at and updated at for users and courses 
+        attributes: { exclude: ['createdAt', 'updatedAt'] }, 
+        include: [ 
+            {
+              model: User,
+              as: 'userId', //courses and user associated with the course
+            },
+          ]
+    });
+    res.status(200).json({
+        title: courses.title,
+        description: courses.description,
+        estimatedTime: courses.estimatedTime,
+        materialsNeeded: courses.materialsNeeded
+    })
+    }));
+
 
 
 
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
 router.post('/courses/:id'), asyncHandler(async(req,res) =>{
-    try {
-        let courses = await Course.create(req.body);
-        res.redirect("/");
-      } catch (error) {
-        if(error.name === "SequelizeValidationError") {
-           courses = await Courses.build(req.body);
-        //   res.render({ Courses, error: error.errors})
-        } else {
-          throw error;
-        }  
-}})
+    try{
+        const course = await records.createCourse({
+            title: req.body.title,
+            description: req.body.description
+        });
+        res.status(201).json(course).end();
+    } catch (error) {
+        if (error.name === "SequelizeValidationError") {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
+            res.status(400).json({message: "title and description required."});
+        } else{
+            throw error;
+        }    
+    }
+});
+
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
 router.put('/courses/:id'), asyncHandler(async(req,res) =>{
 // add a try catch -- using a find by pk, course.update 
@@ -112,9 +133,8 @@ const course = await Course.findByPk(req.params.id); //async call
         }
     } catch (error) {
         if (error.name === "SequelizeValidationError") {
-            // const course = await Course.build(req.body);
-            course.id = req.body.id; // make sure correct course gets updated  
-            res.status(400);
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
         } else{
             throw error;
         }
