@@ -1,6 +1,7 @@
 'use strict';
 
 const { sequelize, models } = require('./models');
+const routes = require('./routes')
 
 (async () => {
   try {
@@ -26,6 +27,8 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
+app.use(express.json());
+app.use('/api', routes);
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
