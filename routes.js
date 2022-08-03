@@ -7,6 +7,8 @@ const { restart } = require('nodemon');
 // const Course = require('./models').Course;
 const router = express.Router(); // Construct a router instance.
 const {User, Course} = require('./models');
+const { authenticateUser } = require('./middleware/auth-user');
+
 
 // Handler function to wrap each route.
 function asyncHandler(cb) {
@@ -21,7 +23,7 @@ function asyncHandler(cb) {
   }
 
 //route returns all properties and values for the currently authenticated user
-router.get('/users', asyncHandler(async (req, res) => {
+router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
     const user = req.currentUser; // Store the user on the Request object
     res.status(200).json({ 
             firstName: user.firstName,
@@ -94,7 +96,7 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
 
 
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
-router.post('/courses/:id'), asyncHandler(async(req,res) =>{
+router.post('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
     try{
         const course = await records.createCourse({
             title: req.body.title,
@@ -113,7 +115,7 @@ router.post('/courses/:id'), asyncHandler(async(req,res) =>{
 });
 
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
-router.put('/courses/:id'), asyncHandler(async(req,res) =>{
+router.put('/courses/:id'), authenticateUser,  asyncHandler(async(req,res) =>{
 // add a try catch -- using a find by pk, course.update 
 const course = await Course.findByPk(req.params.id); //async call
     try {
@@ -138,7 +140,7 @@ const course = await Course.findByPk(req.params.id); //async call
 }})
 
 //api/courses/:id DELETE route that will delete the corresponding course and return a 204 HTTP status code and no content.
-router.delete('/courses/:id'), asyncHandler(async(req,res) =>{ // use from project 
+router.delete('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{ // use from project 
     const course = await Course.findByPk(req.params.id);
     if (course) {
       if (req.currentUser.id === course.userId){
