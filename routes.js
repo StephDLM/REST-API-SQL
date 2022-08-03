@@ -38,7 +38,7 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
 router.post('/users', asyncHandler(async (req, res) => {
     try {
       await User.create(req.body);
-      res.redirect("/");
+      res.location("/");
       res.status(201).json({ "message": "Account successfully created!" });
     } catch (error) {
       console.log('ERROR: ', error.name);
@@ -98,10 +98,8 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
 router.post('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
     try{
-        const course = await records.createCourse({
-            title: req.body.title,
-            description: req.body.description
-        });
+        const course = await Course.create(req.body);
+        res.location(`courses/${course.id}`);
         res.status(201).json(course).end();
     } catch (error) {
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
@@ -117,13 +115,13 @@ router.post('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
 router.put('/courses/:id'), authenticateUser,  asyncHandler(async(req,res) =>{
 // add a try catch -- using a find by pk, course.update 
-const course = await Course.findByPk(req.params.id); //async call
+let course 
     try {
+        course = await Course.findByPk(req.params.id); //async call
         if (course) {
             if(req.currentUser.id === course.userId) {
                 await course.update(req.body);
-                res.redirect("/");
-                res.status(204).json({message: "Course has been updated"}).end();
+                res.status(204).json({message: "Course has been updated!"}).end();
             } else {
                 res.sendStatus(404);
             }
@@ -131,7 +129,7 @@ const course = await Course.findByPk(req.params.id); //async call
         res.sendStatus(404);
         }
     } catch (error) {
-        if (error.name === "SequelizeValidationError") {
+        if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });   
         } else{
@@ -155,37 +153,4 @@ router.delete('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
     }})
 
  module.exports = router;
-//not sure if i need this for project
-
-//   // Validate that we have a `name` value.
-//   if (!user.name) {
-//     errors.push('Please provide a value for "name"');
-//   }
-
-//   // Validate that we have an `email` value.
-//   if (!user.email) {
-//     errors.push('Please provide a value for "email"');
-//   } 
-
-//   // Validate that we have a `password` value.
-//   let password = user.password;
-//   if (!password) {
-//     errors.push('Please provide a value for "password"');
-//   } else if (password.length < 8 || password.length > 20) {
-//     errors.push('Your password should be between 8 and 20 characters');
-//   } else {
-//     user.password = bcrypt.hashSync(password, 10);
-//   }
-
-  // If there are any errors...
-//   if (errors.length > 0) {
-//     // Return the validation errors to the client.
-//     res.status(400).json({ errors });
-//   } else {
-//     // Add the user to the `users` array.
-//     users.push(user);
-
-//     // Set the status to 201 Created and end the response.
-//     res.status(201).end();
-//   };
 

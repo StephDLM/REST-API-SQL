@@ -29,7 +29,7 @@ module.exports = (sequelize) => {
         }
       }
     },
-    email: {
+    emailAddress: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: {
