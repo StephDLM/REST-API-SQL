@@ -28,7 +28,7 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
     res.status(200).json({ 
             firstName: user.firstName,
             lastName: user.lastName,
-            email: user.emailAddress,
+            emailAddress: user.emailAddress,
      });
     res.json(user);
   }));
@@ -61,7 +61,7 @@ router.get('/courses', asyncHandler(async(req, res) =>{
               model: User,
               as: 'user', //courses and user associated with the course
               //do not include created at and updated at for users
-              attributes: ['firstName', 'lastName', 'email']
+              attributes: ['firstName', 'lastName', 'emailAddress']
               
             },
           ],through: {
@@ -86,23 +86,18 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
             },
           ]
     });
-    res.status(200).json({
-        title: courses.title,
-        description: courses.description,
-        estimatedTime: courses.estimatedTime,
-        materialsNeeded: courses.materialsNeeded
-    })
+    res.status(200).json({courses})
     }));
 
 
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
-router.post('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
-    try{
-        const course = await Course.create(req.body);
-        res.location(`courses/${course.id}`);
-        res.status(201).json(course).end();
+router.post('/courses', authenticateUser, asyncHandler(async(req,res) => {
+    try {
+        const course = await Course.create(req.body);;
+        res.location(`/courses/${course.id}`);
+        res.status(201).json({message: "Course was successfully created!"}).end();
     } catch (error) {
-        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+        if ( error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });   
             // res.status(400).json({message: "title and description required."});
@@ -110,10 +105,11 @@ router.post('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
             throw error;
         }    
     }
-});
+}));
+
 
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
-router.put('/courses/:id'), authenticateUser,  asyncHandler(async(req,res) =>{
+router.put('/courses/:id', authenticateUser,  asyncHandler(async(req,res) =>{
 // add a try catch -- using a find by pk, course.update 
 let course 
     try {
@@ -129,16 +125,16 @@ let course
         res.sendStatus(404);
         }
     } catch (error) {
-        if (error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
+        if ( error.name === "SequelizeValidationError" || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
             res.status(400).json({ errors });   
         } else{
             throw error;
         }
-}})
+}}));
 
 //api/courses/:id DELETE route that will delete the corresponding course and return a 204 HTTP status code and no content.
-router.delete('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{ // use from project 
+router.delete('/courses/:id', authenticateUser, asyncHandler(async(req,res) =>{ // use from project 
     const course = await Course.findByPk(req.params.id);
     if (course) {
       if (req.currentUser.id === course.userId){
@@ -150,7 +146,7 @@ router.delete('/courses/:id'), authenticateUser, asyncHandler(async(req,res) =>{
       }
     } else {
       res.sendStatus(404);
-    }})
+    }}));
 
  module.exports = router;
 
