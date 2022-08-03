@@ -59,7 +59,7 @@ router.get('/courses', asyncHandler(async(req, res) =>{
         include: [ 
             {
               model: User,
-              as: 'userId', //courses and user associated with the course
+              as: 'user', //courses and user associated with the course
               //do not include created at and updated at for users
               attributes: ['firstName', 'lastName', 'email']
               
@@ -82,7 +82,7 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
         include: [ 
             {
               model: User,
-              as: 'userId', //courses and user associated with the course
+              as: 'user', //courses and user associated with the course
             },
           ]
     });
