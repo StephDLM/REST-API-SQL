@@ -93,7 +93,7 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
 ///api/courses POST route that will create a new course, set the Location header to the URI for the newly created course, and return a 201 HTTP status code and no content.
 router.post('/courses', authenticateUser, asyncHandler(async(req,res) => {
     try {
-        const course = await Course.create(req.body);;
+        const course = await Course.create(req.body);
         res.location(`/courses/${course.id}`);
         res.status(201).json({message: "Course was successfully created!"}).end();
     } catch (error) {
@@ -111,7 +111,7 @@ router.post('/courses', authenticateUser, asyncHandler(async(req,res) => {
 //api/courses/:id PUT route that will update the corresponding course and return a 204 HTTP status code and no content.
 router.put('/courses/:id', authenticateUser,  asyncHandler(async(req,res) =>{
 // add a try catch -- using a find by pk, course.update 
-let course 
+let course ;
     try {
         course = await Course.findByPk(req.params.id); //async call
         if (course) {
