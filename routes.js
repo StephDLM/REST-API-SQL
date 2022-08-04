@@ -56,6 +56,7 @@ router.post('/users', asyncHandler(async (req, res) => {
 //source for attributes: https://sequelize.org/docs/v6/advanced-association-concepts/eager-loading/#fetching-all-associated-elements
 router.get('/courses', asyncHandler(async(req, res) =>{
     const courses = await Course.findAll({
+        attributes: { exclude: ['createdAt', 'updatedAt'] }, 
         include: [ 
             {
               model: User,
@@ -83,8 +84,8 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
             {
               model: User,
               as: 'user', //courses and user associated with the course
-            },
-          ]
+            }
+          ],         
     });
     res.status(200).json({courses})
     }));
@@ -115,11 +116,11 @@ let course ;
     try {
         course = await Course.findByPk(req.params.id); //async call
         if (course) {
-            if(req.currentUser.id === course.userId) {
+            if(req.currentUser.id === course.userId) {//create if/else statement to provide 403 error 
                 await course.update(req.body);
                 res.status(204).end();
             } else {
-                res.sendStatus(404);
+                res.sendStatus(403).json({message: "You aren't authorized to delete this course"});
             }
         } else {
         res.sendStatus(404);
@@ -137,11 +138,11 @@ let course ;
 router.delete('/courses/:id', authenticateUser, asyncHandler(async(req,res) =>{ // use from project 
     const course = await Course.findByPk(req.params.id);
     if (course) {
-      if (req.currentUser.id === course.userId){
+      if (req.currentUser.id === course.userId){//create if/else statement to provide 403 error 
         await course.destroy();
         res.status(204).end();
       } else {
-        res.status(400);
+        res.status(403).json({message: "You aren't authorized to delete this course"});
       }
     } else {
       res.sendStatus(404);

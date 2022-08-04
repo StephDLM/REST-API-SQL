@@ -1,6 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
 
-
 module.exports = (sequelize) => {
     class Course extends Model {}
     Course.init({
@@ -10,9 +9,9 @@ module.exports = (sequelize) => {
         validate: {
             notNull: {
               msg: 'A title is required'
-            },
+              },
             notEmpty: {
-              msg: 'title provide a password'
+              msg: 'A title is required'
             }
           }
       },
@@ -21,10 +20,10 @@ module.exports = (sequelize) => {
         allowNull: false,
         validate: {
             notNull: {
-              msg: 'A title is required'
-            },
+              msg: 'A description is required'
+              },
             notEmpty: {
-              msg: 'title provide a password'
+              msg: 'Please provide a description'
             }
           }
       },
@@ -32,7 +31,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
       },
       materialsNeeded: {
-          type: DataTypes.STRING,
+        type: DataTypes.STRING,
         },
     }, { sequelize });
   

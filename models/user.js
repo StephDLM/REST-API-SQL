@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'A name is required'
+          msg: 'A last name is required'
         },
         notEmpty: {
           msg: 'Please provide a name'
@@ -40,7 +40,7 @@ module.exports = (sequelize) => {
             msg:"An email is required"
         },
         isEmail: {
-            msg:"Please provide an email address please"
+            msg:"Please provide an email address"
         }
       }
 
