@@ -30,7 +30,6 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
             lastName: user.lastName,
             emailAddress: user.emailAddress,
      });
-    res.json(user);
   }));
 
 
@@ -56,12 +55,12 @@ router.post('/users', asyncHandler(async (req, res) => {
 //source for attributes: https://sequelize.org/docs/v6/advanced-association-concepts/eager-loading/#fetching-all-associated-elements
 router.get('/courses', asyncHandler(async(req, res) =>{
     const courses = await Course.findAll({
-        attributes: { exclude: ['createdAt', 'updatedAt'] }, 
+        attributes: { exclude: ['createdAt', 'updatedAt'] },//do not include created at and updated at for users
+
         include: [ 
             {
               model: User,
               as: 'user', //courses and user associated with the course
-              //do not include created at and updated at for users
               attributes: ['firstName', 'lastName', 'emailAddress']
               
             },
@@ -83,7 +82,7 @@ router.get('/courses/:id', asyncHandler(async(req,res) =>{
         include: [ 
             {
               model: User,
-              as: 'user', //courses and user associated with the course
+            //   as: 'user', //courses and user associated with the course
             }
           ],         
     });
@@ -116,11 +115,12 @@ let course ;
     try {
         course = await Course.findByPk(req.params.id); //async call
         if (course) {
-            if(req.currentUser.id === course.userId) {//create if/else statement to provide 403 error 
+    //if requester user id is the same as userId course, allow update course, else provide a 403 error
+            if(req.currentUser.id === course.userId) {
                 await course.update(req.body);
                 res.status(204).end();
             } else {
-                res.sendStatus(403).json({message: "You aren't authorized to delete this course"});
+                res.sendStatus(403).json({message: "You aren't authorized to update this course"});
             }
         } else {
         res.sendStatus(404);
@@ -138,7 +138,7 @@ let course ;
 router.delete('/courses/:id', authenticateUser, asyncHandler(async(req,res) =>{ // use from project 
     const course = await Course.findByPk(req.params.id);
     if (course) {
-      if (req.currentUser.id === course.userId){//create if/else statement to provide 403 error 
+      if (req.currentUser.id === course.userId){//make sure that user is = create if/else statement to provide 403 error 
         await course.destroy();
         res.status(204).end();
       } else {
